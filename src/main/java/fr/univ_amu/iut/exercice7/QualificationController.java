@@ -65,6 +65,22 @@ public class QualificationController {
     // 6. zoneCommentaire <-> commentaireProperty (bidirectionnel).
     // 7. choiceVerdict : items = viewModel.listeVerdicts(), valeur <-> verdictSaisiProperty.
     // 8. labelVerdictGlobal <- verdictGlobalLibelleProperty.
+
+    tableSequences.setItems(viewModel.sequencesProperty());
+    viewModel
+        .sequenceSelectionneeProperty()
+        .bind(tableSequences.getSelectionModel().selectedItemProperty());
+
+    labelSelection.textProperty().bind(viewModel.descriptionSelectionProperty());
+
+    boutonEcouter.disableProperty().bind(viewModel.peutEcouterProperty().not());
+
+    zoneCommentaire.textProperty().bindBidirectional(viewModel.commentaireProperty());
+
+    choiceVerdict.getItems().setAll(viewModel.listeVerdicts());
+    choiceVerdict.valueProperty().bindBidirectional(viewModel.verdictSaisiProperty());
+
+    labelVerdictGlobal.textProperty().bind(viewModel.verdictGlobalLibelleProperty());
   }
 
   @FXML

@@ -3,6 +3,7 @@ package fr.univ_amu.iut.exercice7;
 import com.google.inject.Inject;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -46,13 +47,34 @@ public class QualificationViewModel {
     // TODO exercice 7 : lier les deux libellés dérivés.
     //
     // 1. descriptionSelection :
-    //    - si aucune séquence n'est sélectionnée -> "(sélectionnez une séquence dans le tableau)"
-    //    - sinon -> "Séquence HH:mm - XX.X kHz" (heure puis fréquence à 1 décimale)
-    //    Astuce : Bindings.createStringBinding(() -> {...}, sequenceSelectionnee).
+    // - si aucune séquence n'est sélectionnée -> "(sélectionnez une séquence dans
+    // le tableau)"
+    // - sinon -> "Séquence HH:mm - XX.X kHz" (heure puis fréquence à 1 décimale)
+    // Astuce : Bindings.createStringBinding(() -> {...}, sequenceSelectionnee).
     //
     // 2. verdictGlobalLibelle : "Verdict global : (à saisir)" tant que le verdict
-    //    du modèle est vide, sinon "Verdict global : <verdict>".
-    //    Astuce : dépend de nuit.verdictGlobalProperty().
+    // du modèle est vide, sinon "Verdict global : <verdict>".
+    // Astuce : dépend de nuit.verdictGlobalProperty().
+    descriptionSelection.bind(
+        Bindings.createStringBinding(
+            () -> {
+              if (sequenceSelectionnee.get() == null) {
+                return "(sélectionnez une séquence dans le tableau)";
+              }
+              return String.format(
+                  "Séquence %s - %.1f kHz",
+                  HEURE.format(sequenceSelectionnee.get().getHorodatage()),
+                  sequenceSelectionnee.get().getFrequenceDominanteKHz());
+            },
+            sequenceSelectionnee));
+
+    verdictGlobalLibelle.bind(
+        Bindings.createStringBinding(
+            () -> {
+              String verdict = nuit.verdictGlobalProperty().get();
+              return "Verdict global : " + (verdict.isBlank() ? "(à saisir)" : verdict);
+            },
+            nuit.verdictGlobalProperty()));
   }
 
   public ObservableList<Sequence> sequencesProperty() {
@@ -90,11 +112,17 @@ public class QualificationViewModel {
 
   /** Marque la séquence sélectionnée comme "Écoutée". */
   public void ecouterCommand() {
-    // TODO exercice 7 : si une séquence est sélectionnée, passer son statut à "Écoutée".
+    // TODO exercice 7 : si une séquence est sélectionnée, passer son statut à
+    // "Écoutée".
+    if (sequenceSelectionnee.get() != null) {
+      sequenceSelectionnee.get().setStatut("Écoutée");
+    }
   }
 
   /** Enregistre le verdict saisi dans le modèle de la nuit. */
   public void enregistrerVerdictCommand() {
-    // TODO exercice 7 : recopier le verdict saisi dans le modèle (nuit.setVerdictGlobal).
+    // TODO exercice 7 : recopier le verdict saisi dans le modèle
+    // (nuit.setVerdictGlobal).
+    nuit.setVerdictGlobal(verdictSaisi.get());
   }
 }
